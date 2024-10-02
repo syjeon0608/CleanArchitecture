@@ -3,18 +3,23 @@ package com.hhplus.clean.architecture.domain.lecture;
 import com.hhplus.clean.architecture.domain.error.BusinessException;
 import com.hhplus.clean.architecture.domain.user.User;
 import com.hhplus.clean.architecture.domain.user.UserRepository;
+import com.hhplus.clean.architecture.infrastructure.lecture.LectureJpaRepository;
+import com.hhplus.clean.architecture.infrastructure.lecture.LectureRepositoryImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDate;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
-import static com.hhplus.clean.architecture.domain.error.BusinessExceptionCode.DUPLICATE_ENROLLMENT;
-import static com.hhplus.clean.architecture.domain.error.BusinessExceptionCode.LECTURE_FULL;
+import static com.hhplus.clean.architecture.domain.error.BusinessExceptionCode.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
@@ -37,8 +42,6 @@ class LectureServiceTest {
     @BeforeEach
     void setUp() {
         user = new User(1L, "UserA");
-        when(userRepository.getUser(1L)).thenReturn(user);
-
         lecture = new Lecture(1L, "Go Java!", "허 재");
     }
 
@@ -46,6 +49,7 @@ class LectureServiceTest {
     @DisplayName("특강 신청이 성공적으로 이루어져야 한다")
     void shouldRegisterLectureSuccessfully() {
         //given
+        when(userRepository.getUser(1L)).thenReturn(user);
         LectureSchedule schedule = new LectureSchedule(1L, lecture, 30, LocalDate.now());
         when(lectureRepository.getLectureSchedule(1L)).thenReturn(schedule);
         when(lectureRepository.isUserAlreadyRegistered(user, schedule)).thenReturn(false);
@@ -67,6 +71,7 @@ class LectureServiceTest {
     @DisplayName("이미 신청한 특강에 중복 신청 시 예외가 발생해야 한다")
     void shouldThrowExceptionWhenUserIsAlreadyRegistered() {
         // given
+        when(userRepository.getUser(1L)).thenReturn(user);
         LectureSchedule schedule = new LectureSchedule(1L, lecture, 30, LocalDate.now());
         when(lectureRepository.getLectureSchedule(1L)).thenReturn(schedule);
         when(lectureRepository.isUserAlreadyRegistered(user, schedule)).thenReturn(true);
@@ -82,6 +87,7 @@ class LectureServiceTest {
     @DisplayName("수강 인원이 마감된 경우 예외가 발생해야 한다")
     void shouldThrowExceptionWhenLectureIsFull() {
         // given
+        when(userRepository.getUser(1L)).thenReturn(user);
         LectureSchedule schedule = new LectureSchedule(1L, lecture, 0, LocalDate.now());
         when(lectureRepository.getLectureSchedule(1L)).thenReturn(schedule);
         when(lectureRepository.isUserAlreadyRegistered(user, schedule)).thenReturn(false);
@@ -97,6 +103,7 @@ class LectureServiceTest {
     @DisplayName("특강 신청 후 수강인원이 정상적으로 감소해야 한다")
     void shouldDecreaseLectureCapacity() {
         // given
+        when(userRepository.getUser(1L)).thenReturn(user);
         LectureSchedule schedule = new LectureSchedule(1L, lecture, 30, LocalDate.now());
         when(lectureRepository.getLectureSchedule(1L)).thenReturn(schedule);
         when(lectureRepository.isUserAlreadyRegistered(user, schedule)).thenReturn(false);
@@ -108,5 +115,21 @@ class LectureServiceTest {
         assertEquals(29, schedule.getCapacity());
     }
 
+    @Test
+    @DisplayName("전체 특강목록을 조회한다")
+    void shouldGetLectureSuccessfully() {
+        //given
+        Lecture lecture1 = new Lecture(1L, "Go Java!", "허 재");
+        Lecture lecture2 = new Lecture(2L, "Go python!", "렌");
+        Lecture lecture3 = new Lecture(3L, "Go C#!", "로이");
+        when(lectureRepository.getLectureList()).thenReturn(Arrays.asList(lecture1, lecture2, lecture3));
+
+        //when
+        List<Lecture> lectures = lectureService.getLectureList();
+        //then
+        assertNotNull(lectures);
+        assertEquals(3, lectures.size());
+        assertEquals(3L, lectures.get(2).getId());
+    }
 
 }

@@ -9,7 +9,7 @@ import org.springframework.http.HttpStatus;
 public enum BusinessExceptionCode implements ErrorCode{
 
     // NOT_FOUND
-    LECTURE_NOT_FOUND(HttpStatus.NOT_FOUND, "강의를 찾을 수 없습니다."),
+    LECTURE_NOT_FOUND(HttpStatus.NOT_FOUND, "신청 가능한 강의가 없습니다."),
     USER_NOT_FOUND(HttpStatus.NOT_FOUND, "사용자를 찾을 수 없습니다."),
 
     //수강 신청 관련 예외

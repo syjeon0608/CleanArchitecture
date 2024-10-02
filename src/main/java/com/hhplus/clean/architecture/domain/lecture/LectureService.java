@@ -6,6 +6,8 @@ import com.hhplus.clean.architecture.domain.user.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 import static com.hhplus.clean.architecture.domain.error.BusinessExceptionCode.DUPLICATE_ENROLLMENT;
 
 @Service
@@ -26,9 +28,13 @@ public class LectureService {
 
         schedule.reduceCapacity();
         LectureRegistration registration = LectureRegistration.create(user, schedule);
-        LectureRegistration savedLecture =  lectureRepository.completeLectureRegistration(registration);
+        LectureRegistration savedLecture = lectureRepository.completeLectureRegistration(registration);
 
         return savedLecture;
+    }
+
+    public List<Lecture> getLectureList() {
+        return lectureRepository.getLectureList();
     }
 
 

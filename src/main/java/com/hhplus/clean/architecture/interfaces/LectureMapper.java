@@ -1,8 +1,13 @@
 package com.hhplus.clean.architecture.interfaces;
 
+import com.hhplus.clean.architecture.domain.lecture.Lecture;
 import com.hhplus.clean.architecture.domain.lecture.LectureRegistration;
+import com.hhplus.clean.architecture.interfaces.dto.GetLecturesRes;
 import com.hhplus.clean.architecture.interfaces.dto.RegisterLectureRes;
 import org.springframework.stereotype.Component;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Component
 public class LectureMapper {
@@ -17,6 +22,16 @@ public class LectureMapper {
                 registration.getLectureSchedule().getLecture().getTitle(),
                 registration.getLectureSchedule().getScheduleDate()
         );
+    }
+
+    public List<GetLecturesRes> toGetLecturesRes(List<Lecture> lectures) {
+        return lectures.stream()
+                .map(lecture -> new GetLecturesRes(
+                        lecture.getId(),
+                        lecture.getTitle(),
+                        lecture.getInstructor()
+                ))
+                .collect(Collectors.toList());
     }
 
 }

@@ -1,12 +1,16 @@
 package com.hhplus.clean.architecture.interfaces;
 
 import com.hhplus.clean.architecture.application.LectureFacade;
+import com.hhplus.clean.architecture.domain.lecture.Lecture;
 import com.hhplus.clean.architecture.domain.lecture.LectureRegistration;
+import com.hhplus.clean.architecture.interfaces.dto.GetLecturesRes;
 import com.hhplus.clean.architecture.interfaces.dto.RegisterLectureReq;
 import com.hhplus.clean.architecture.interfaces.dto.RegisterLectureRes;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -25,5 +29,13 @@ public class LectureController {
 
         return ResponseEntity.ok(response);
     }
+
+    @GetMapping("/lectures")
+    public ResponseEntity<List<GetLecturesRes>> getLectures() {
+        List<Lecture> lectures = lectureFacade.getLectures();
+        List<GetLecturesRes> response = lectureMapper.toGetLecturesRes(lectures);
+        return ResponseEntity.ok(response);
+    }
+
 
 }
