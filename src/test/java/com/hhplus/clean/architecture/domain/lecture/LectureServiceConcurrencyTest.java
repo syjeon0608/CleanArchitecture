@@ -41,6 +41,9 @@ public class LectureServiceConcurrencyTest {
 
         setupTestUsers(numberOfThreads);
 
+        int[] successfulRegistrations = {0};
+        int[] failedRegistrations = {0};
+
         ExecutorService executorService = Executors.newFixedThreadPool(numberOfThreads);
         CountDownLatch latch = new CountDownLatch(numberOfThreads);
 
@@ -50,8 +53,12 @@ public class LectureServiceConcurrencyTest {
             executorService.submit(() -> {
                 try {
                     lectureService.registerLecture(userId, lectureScheduleId);
-                } finally {
+                    successfulRegistrations[0]++;
+                } catch (Exception e){
+                    failedRegistrations[0]++;
+                }finally {
                     latch.countDown();
+
                 }
             });
         }
@@ -63,6 +70,8 @@ public class LectureServiceConcurrencyTest {
                 .orElseThrow(()-> new BusinessException(LECTURE_NOT_FOUND));
 
         assertEquals(0, updateLectureSchedule.getCapacity());
+        assertEquals(30, successfulRegistrations[0]);
+        assertEquals(10, failedRegistrations[0]);
     }
 
     @Test
@@ -106,7 +115,7 @@ public class LectureServiceConcurrencyTest {
 
         // then
         assertEquals(1, successfulRegistrations[0]);
-        assertEquals(4,failedRegistrations[0]);
+        assertEquals(4, failedRegistrations[0]);
     }
 
 
