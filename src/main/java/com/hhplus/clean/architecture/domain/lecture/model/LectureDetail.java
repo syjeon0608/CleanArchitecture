@@ -2,7 +2,7 @@ package com.hhplus.clean.architecture.domain.lecture.model;
 
 import java.util.List;
 
-public record LectureInfo(
+public record LectureDetail(
         Long lectureId,
         String title,
         String instructor,

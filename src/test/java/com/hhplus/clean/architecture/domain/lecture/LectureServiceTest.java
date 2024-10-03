@@ -1,23 +1,19 @@
 package com.hhplus.clean.architecture.domain.lecture;
 
 import com.hhplus.clean.architecture.domain.error.BusinessException;
-import com.hhplus.clean.architecture.domain.lecture.model.LectureInfo;
+import com.hhplus.clean.architecture.domain.lecture.model.LectureDetail;
 import com.hhplus.clean.architecture.domain.user.User;
 import com.hhplus.clean.architecture.domain.user.UserRepository;
-import com.hhplus.clean.architecture.infrastructure.lecture.LectureJpaRepository;
-import com.hhplus.clean.architecture.infrastructure.lecture.LectureRepositoryImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDate;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 import static com.hhplus.clean.architecture.domain.error.BusinessExceptionCode.*;
@@ -146,12 +142,12 @@ class LectureServiceTest {
         when(lectureRepository.getLectureScheduleList(1L)).thenReturn(Arrays.asList(schedule1, schedule2, schedule3));
 
         //when
-        LectureInfo lectureInfo = lectureService.getLectureWithSchedule(lecture.getId());
+        LectureDetail lectureDetail = lectureService.getLectureWithSchedule(lecture.getId());
 
         //then
-        assertEquals(3,lectureInfo.scheduleInfos().size());
-        assertEquals(30,lectureInfo.scheduleInfos().get(0).capacity());
-        assertEquals(LocalDate.of(2024, 10, 3),lectureInfo.scheduleInfos().get(2).scheduleDate());
+        assertEquals(3, lectureDetail.scheduleInfos().size());
+        assertEquals(30, lectureDetail.scheduleInfos().get(0).capacity());
+        assertEquals(LocalDate.of(2024, 10, 3), lectureDetail.scheduleInfos().get(2).scheduleDate());
 
     }
 
@@ -168,11 +164,11 @@ class LectureServiceTest {
         when(lectureRepository.getLectureScheduleList(1L)).thenReturn(Arrays.asList(schedule1, schedule2, schedule3));
 
         //when
-        LectureInfo lectureInfo = lectureService.getLectureWithSchedule(lecture.getId());
+        LectureDetail lectureDetail = lectureService.getLectureWithSchedule(lecture.getId());
 
         //then
-        assertEquals(1,lectureInfo.scheduleInfos().size());
-        assertEquals(3L,lectureInfo.scheduleInfos().get(0).scheduleId());
+        assertEquals(1, lectureDetail.scheduleInfos().size());
+        assertEquals(3L, lectureDetail.scheduleInfos().get(0).scheduleId());
     }
 
     @Test
@@ -188,11 +184,11 @@ class LectureServiceTest {
         ));
 
         //when
-        List<LectureInfo> lectureInfos = lectureService.getRegisteredLectures(user.getId());
+        List<LectureDetail> lectureDetails = lectureService.getRegisteredLectures(user.getId());
 
         //then
-        assertEquals(1L, lectureInfos.get(0).lectureId());
-        assertEquals("Go python!", lectureInfos.get(1).title());
+        assertEquals(1L, lectureDetails.get(0).lectureId());
+        assertEquals("Go python!", lectureDetails.get(1).title());
     }
 
 }

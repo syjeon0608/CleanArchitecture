@@ -2,7 +2,7 @@ package com.hhplus.clean.architecture.interfaces;
 
 import com.hhplus.clean.architecture.domain.lecture.Lecture;
 import com.hhplus.clean.architecture.domain.lecture.LectureRegistration;
-import com.hhplus.clean.architecture.domain.lecture.model.LectureInfo;
+import com.hhplus.clean.architecture.domain.lecture.model.LectureDetail;
 import com.hhplus.clean.architecture.interfaces.dto.GetLectureWithScheduleRes;
 import com.hhplus.clean.architecture.interfaces.dto.GetLecturesRes;
 import com.hhplus.clean.architecture.interfaces.dto.GetRegisteredLecturesRes;
@@ -37,17 +37,17 @@ public class LectureMapper {
                 .collect(Collectors.toList());
     }
 
-    public GetLectureWithScheduleRes toGetLectureWithScheduleRes(LectureInfo lectureInfo) {
+    public GetLectureWithScheduleRes toGetLectureWithScheduleRes(LectureDetail lectureDetail) {
         return new GetLectureWithScheduleRes(
-                lectureInfo.lectureId(),
-                lectureInfo.title(),
-                lectureInfo.instructor(),
-                lectureInfo.scheduleInfos()
+                lectureDetail.lectureId(),
+                lectureDetail.title(),
+                lectureDetail.instructor(),
+                lectureDetail.scheduleInfos()
         );
     }
 
-    public List<GetRegisteredLecturesRes> toGetRegisteredLectureRes(List<LectureInfo> lectureInfos) {
-        return lectureInfos.stream()
+    public List<GetRegisteredLecturesRes> toGetRegisteredLectureRes(List<LectureDetail> lectureDetails) {
+        return lectureDetails.stream()
                 .map(lectureInfo -> new GetRegisteredLecturesRes(
                         lectureInfo.lectureId(),
                         lectureInfo.title(),

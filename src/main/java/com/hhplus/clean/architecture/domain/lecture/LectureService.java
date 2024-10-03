@@ -1,7 +1,7 @@
 package com.hhplus.clean.architecture.domain.lecture;
 
 import com.hhplus.clean.architecture.domain.error.BusinessException;
-import com.hhplus.clean.architecture.domain.lecture.model.LectureInfo;
+import com.hhplus.clean.architecture.domain.lecture.model.LectureDetail;
 import com.hhplus.clean.architecture.domain.lecture.model.ScheduleInfo;
 import com.hhplus.clean.architecture.domain.user.User;
 import com.hhplus.clean.architecture.domain.user.UserRepository;
@@ -42,7 +42,7 @@ public class LectureService {
         return lectureRepository.getLectureList();
     }
 
-    public LectureInfo getLectureWithSchedule(Long lectureId){
+    public LectureDetail getLectureWithSchedule(Long lectureId){
         Lecture lecture = lectureRepository.getLecture(lectureId);
         List<LectureSchedule> schedules = lectureRepository.getLectureScheduleList(lectureId)
                 .stream()
@@ -53,12 +53,12 @@ public class LectureService {
                 .map(schedule -> new ScheduleInfo(schedule.getId(), schedule.getCapacity(), schedule.getScheduleDate()))
                 .toList();
 
-        LectureInfo lectureInfo = new LectureInfo(lectureId, lecture.getTitle(), lecture.getInstructor(), scheduleInfos);
+        LectureDetail lectureDetail = new LectureDetail(lectureId, lecture.getTitle(), lecture.getInstructor(), scheduleInfos);
 
-        return lectureInfo;
+        return lectureDetail;
     }
 
-    public List<LectureInfo> getRegisteredLectures(Long userId) {
+    public List<LectureDetail> getRegisteredLectures(Long userId) {
         userRepository.getUser(userId);
 
         List<LectureRegistration> registrations = lectureRepository.getRegistrationList(userId);
@@ -78,12 +78,12 @@ public class LectureService {
                     .add(scheduleInfo);
         }
 
-        List<LectureInfo> registeredLectures = new ArrayList<>();
+        List<LectureDetail> registeredLectures = new ArrayList<>();
         for (Map.Entry<Lecture, List<ScheduleInfo>> entry : lectureScheduleMap.entrySet()) {
             Lecture lecture = entry.getKey();
             List<ScheduleInfo> scheduleInfos = entry.getValue();
 
-            registeredLectures.add(new LectureInfo(
+            registeredLectures.add(new LectureDetail(
                     lecture.getId(),
                     lecture.getTitle(),
                     lecture.getInstructor(),
