@@ -9,6 +9,7 @@ import com.hhplus.clean.architecture.domain.user.User;
 import com.hhplus.clean.architecture.domain.user.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -25,6 +26,7 @@ public class LectureService {
     private final LectureRepository lectureRepository;
     private final UserRepository userRepository;
 
+    @Transactional
     public RegistrationInfo registerLecture(Long userId, Long lectureScheduleId) {
         User user = userRepository.getUser(userId);
         LectureSchedule schedule = lectureRepository.getLectureSchedule(lectureScheduleId);
@@ -50,6 +52,7 @@ public class LectureService {
         return registrationInfo;
     }
 
+    @Transactional(readOnly = true)
     public List<LectureInfo> getLectureList() {
         List<Lecture> lectures = lectureRepository.getLectureList();
 
@@ -64,6 +67,7 @@ public class LectureService {
         return lectureInfos;
     }
 
+    @Transactional(readOnly = true)
     public LectureDetail getLectureWithSchedule(Long lectureId){
         Lecture lecture = lectureRepository.getLecture(lectureId);
         List<LectureSchedule> schedules = lectureRepository.getLectureScheduleList(lectureId)
@@ -80,6 +84,7 @@ public class LectureService {
         return lectureDetail;
     }
 
+    @Transactional(readOnly = true)
     public List<LectureDetail> getRegisteredLectures(Long userId) {
         userRepository.getUser(userId);
 
