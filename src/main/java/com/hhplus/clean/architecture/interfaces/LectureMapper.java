@@ -1,8 +1,8 @@
 package com.hhplus.clean.architecture.interfaces;
 
-import com.hhplus.clean.architecture.domain.lecture.Lecture;
-import com.hhplus.clean.architecture.domain.lecture.LectureRegistration;
 import com.hhplus.clean.architecture.domain.lecture.model.LectureDetail;
+import com.hhplus.clean.architecture.domain.lecture.model.LectureInfo;
+import com.hhplus.clean.architecture.domain.lecture.model.RegistrationInfo;
 import com.hhplus.clean.architecture.interfaces.dto.GetLectureWithScheduleRes;
 import com.hhplus.clean.architecture.interfaces.dto.GetLecturesRes;
 import com.hhplus.clean.architecture.interfaces.dto.GetRegisteredLecturesRes;
@@ -15,24 +15,24 @@ import java.util.stream.Collectors;
 @Component
 public class LectureMapper {
 
-    public RegisterLectureRes toRegisterLectureRes(LectureRegistration registration) {
+    public RegisterLectureRes toRegisterLectureRes(RegistrationInfo registration) {
         return new RegisterLectureRes(
-                registration.getId(),
-                registration.getUser().getId(),
-                registration.getUser().getName(),
-                registration.getLectureSchedule().getId(),
-                registration.getLectureSchedule().getLecture().getId(),
-                registration.getLectureSchedule().getLecture().getTitle(),
-                registration.getLectureSchedule().getScheduleDate()
+                registration.registerId(),
+                registration.userId(),
+                registration.userName(),
+                registration.scheduleId(),
+                registration.lectureId(),
+                registration.title(),
+                registration.scheduleDate()
         );
     }
 
-    public List<GetLecturesRes> toGetLecturesRes(List<Lecture> lectures) {
+    public List<GetLecturesRes> toGetLecturesRes(List<LectureInfo> lectures) {
         return lectures.stream()
                 .map(lecture -> new GetLecturesRes(
-                        lecture.getId(),
-                        lecture.getTitle(),
-                        lecture.getInstructor()
+                        lecture.lectureId(),
+                        lecture.title(),
+                        lecture.instructor()
                 ))
                 .collect(Collectors.toList());
     }

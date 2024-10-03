@@ -2,6 +2,8 @@ package com.hhplus.clean.architecture.domain.lecture;
 
 import com.hhplus.clean.architecture.domain.error.BusinessException;
 import com.hhplus.clean.architecture.domain.lecture.model.LectureDetail;
+import com.hhplus.clean.architecture.domain.lecture.model.LectureInfo;
+import com.hhplus.clean.architecture.domain.lecture.model.RegistrationInfo;
 import com.hhplus.clean.architecture.domain.user.User;
 import com.hhplus.clean.architecture.domain.user.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -16,7 +18,8 @@ import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
 
-import static com.hhplus.clean.architecture.domain.error.BusinessExceptionCode.*;
+import static com.hhplus.clean.architecture.domain.error.BusinessExceptionCode.DUPLICATE_ENROLLMENT;
+import static com.hhplus.clean.architecture.domain.error.BusinessExceptionCode.LECTURE_FULL;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
@@ -55,12 +58,12 @@ class LectureServiceTest {
         when(lectureRepository.completeLectureRegistration(any(LectureRegistration.class))).thenReturn(registration);
 
         //when
-        LectureRegistration savedRegistration = lectureService.registerLecture(1L, 1L);
+        RegistrationInfo savedRegistration = lectureService.registerLecture(1L, 1L);
 
         //then
         assertNotNull(savedRegistration);
-        assertEquals(user, savedRegistration.getUser());
-        assertEquals(schedule, savedRegistration.getLectureSchedule());
+        assertEquals(1L, savedRegistration.userId());
+        assertEquals(1L, savedRegistration.scheduleId());
     }
 
 
@@ -106,7 +109,7 @@ class LectureServiceTest {
         when(lectureRepository.isUserAlreadyRegistered(user, schedule)).thenReturn(false);
 
         // when
-        LectureRegistration registration = lectureService.registerLecture(1L, 1L);
+        RegistrationInfo registration = lectureService.registerLecture(1L, 1L);
 
         // then
         assertEquals(29, schedule.getCapacity());
@@ -122,11 +125,11 @@ class LectureServiceTest {
         when(lectureRepository.getLectureList()).thenReturn(Arrays.asList(lecture1, lecture2, lecture3));
 
         //when
-        List<Lecture> lectures = lectureService.getLectureList();
+        List<LectureInfo> lectures = lectureService.getLectureList();
         //then
         assertNotNull(lectures);
         assertEquals(3, lectures.size());
-        assertEquals(3L, lectures.get(2).getId());
+        assertEquals(3L, lectures.get(2).lectureId());
     }
 
     @Test
