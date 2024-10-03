@@ -6,7 +6,7 @@ import java.util.List;
 
 public interface LectureRepository {
 
-    LectureSchedule getLectureSchedule(Long lectureScheduleId);
+    LectureSchedule getLectureScheduleWithLock(Long lectureScheduleId);
 
     LectureRegistration completeLectureRegistration(LectureRegistration registration);
 

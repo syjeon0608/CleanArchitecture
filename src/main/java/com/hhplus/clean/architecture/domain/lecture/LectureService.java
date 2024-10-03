@@ -29,7 +29,7 @@ public class LectureService {
     @Transactional
     public RegistrationInfo registerLecture(Long userId, Long lectureScheduleId) {
         User user = userRepository.getUser(userId);
-        LectureSchedule schedule = lectureRepository.getLectureSchedule(lectureScheduleId);
+        LectureSchedule schedule = lectureRepository.getLectureScheduleWithLock(lectureScheduleId);
 
         boolean isAlreadyRegisteredForLecture = lectureRepository.isUserAlreadyRegistered(user, schedule);
         if (isAlreadyRegisteredForLecture) {

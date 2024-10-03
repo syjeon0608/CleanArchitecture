@@ -51,7 +51,7 @@ class LectureServiceTest {
         //given
         when(userRepository.getUser(1L)).thenReturn(user);
         LectureSchedule schedule = new LectureSchedule(1L, lecture, 30, LocalDate.now());
-        when(lectureRepository.getLectureSchedule(1L)).thenReturn(schedule);
+        when(lectureRepository.getLectureScheduleWithLock(1L)).thenReturn(schedule);
         when(lectureRepository.isUserAlreadyRegistered(user, schedule)).thenReturn(false);
 
         LectureRegistration registration = LectureRegistration.create(user, schedule);
@@ -73,7 +73,7 @@ class LectureServiceTest {
         // given
         when(userRepository.getUser(1L)).thenReturn(user);
         LectureSchedule schedule = new LectureSchedule(1L, lecture, 30, LocalDate.now());
-        when(lectureRepository.getLectureSchedule(1L)).thenReturn(schedule);
+        when(lectureRepository.getLectureScheduleWithLock(1L)).thenReturn(schedule);
         when(lectureRepository.isUserAlreadyRegistered(user, schedule)).thenReturn(true);
 
         // when & then
@@ -89,7 +89,7 @@ class LectureServiceTest {
         // given
         when(userRepository.getUser(1L)).thenReturn(user);
         LectureSchedule schedule = new LectureSchedule(1L, lecture, 0, LocalDate.now());
-        when(lectureRepository.getLectureSchedule(1L)).thenReturn(schedule);
+        when(lectureRepository.getLectureScheduleWithLock(1L)).thenReturn(schedule);
         when(lectureRepository.isUserAlreadyRegistered(user, schedule)).thenReturn(false);
 
         // when & then
@@ -105,7 +105,7 @@ class LectureServiceTest {
         // given
         when(userRepository.getUser(1L)).thenReturn(user);
         LectureSchedule schedule = new LectureSchedule(1L, lecture, 30, LocalDate.now());
-        when(lectureRepository.getLectureSchedule(1L)).thenReturn(schedule);
+        when(lectureRepository.getLectureScheduleWithLock(1L)).thenReturn(schedule);
         when(lectureRepository.isUserAlreadyRegistered(user, schedule)).thenReturn(false);
 
         // when
