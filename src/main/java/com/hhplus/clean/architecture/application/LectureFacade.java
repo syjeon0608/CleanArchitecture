@@ -3,6 +3,7 @@ package com.hhplus.clean.architecture.application;
 import com.hhplus.clean.architecture.domain.lecture.Lecture;
 import com.hhplus.clean.architecture.domain.lecture.LectureRegistration;
 import com.hhplus.clean.architecture.domain.lecture.LectureService;
+import com.hhplus.clean.architecture.domain.lecture.model.LectureInfo;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -20,6 +21,10 @@ public class LectureFacade {
 
     public List<Lecture> getLectures(){
         return lectureService.getLectureList();
+    }
+
+    public LectureInfo getLectureWithSchedules(Long lectureId) {
+        return lectureService.getLectureWithSchedule(lectureId);
     }
 
 }

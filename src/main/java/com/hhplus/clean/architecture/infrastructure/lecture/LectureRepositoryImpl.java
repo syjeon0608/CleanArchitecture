@@ -45,4 +45,19 @@ public class LectureRepositoryImpl implements LectureRepository {
         return lectures;
     }
 
+    @Override
+    public Lecture getLecture(Long lectureId) {
+        return lectureJpaRepository.findById(lectureId)
+                .orElseThrow(() -> new BusinessException(LECTURE_NOT_FOUND));
+    }
+
+    @Override
+    public List<LectureSchedule> getLectureScheduleList(Long lectureId) {
+        List<LectureSchedule> schedules = scheduleJpaRepository.findByLectureIdOrderByScheduleDateAsc(lectureId);
+        if(schedules.isEmpty()){
+            throw new BusinessException(LECTURE_NOT_FOUND);
+        }
+        return schedules;
+    }
+
 }

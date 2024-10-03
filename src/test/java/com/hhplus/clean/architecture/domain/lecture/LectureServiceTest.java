@@ -1,6 +1,7 @@
 package com.hhplus.clean.architecture.domain.lecture;
 
 import com.hhplus.clean.architecture.domain.error.BusinessException;
+import com.hhplus.clean.architecture.domain.lecture.model.LectureInfo;
 import com.hhplus.clean.architecture.domain.user.User;
 import com.hhplus.clean.architecture.domain.user.UserRepository;
 import com.hhplus.clean.architecture.infrastructure.lecture.LectureJpaRepository;
@@ -130,6 +131,48 @@ class LectureServiceTest {
         assertNotNull(lectures);
         assertEquals(3, lectures.size());
         assertEquals(3L, lectures.get(2).getId());
+    }
+
+    @Test
+    @DisplayName("수강 신청 가능한 날짜별 특강 목록을 조회한다.")
+    void shouldGetAvailableLectureSchedulesByLectureId(){
+        //given
+        Lecture lecture = new Lecture(1L, "Go Java!", "허 재");
+        when(lectureRepository.getLecture(1L)).thenReturn(lecture);
+
+        LectureSchedule schedule1 = new LectureSchedule(1L, lecture, 30, LocalDate.of(2024, 10, 1));
+        LectureSchedule schedule2 = new LectureSchedule(2L, lecture, 20, LocalDate.of(2024, 10, 2));
+        LectureSchedule schedule3 = new LectureSchedule(3L, lecture, 20, LocalDate.of(2024, 10, 3));
+        when(lectureRepository.getLectureScheduleList(1L)).thenReturn(Arrays.asList(schedule1, schedule2, schedule3));
+
+        //when
+        LectureInfo lectureInfo = lectureService.getLectureWithSchedule(lecture.getId());
+
+        //then
+        assertEquals(3,lectureInfo.scheduleInfos().size());
+        assertEquals(30,lectureInfo.scheduleInfos().get(0).capacity());
+        assertEquals(LocalDate.of(2024, 10, 3),lectureInfo.scheduleInfos().get(2).scheduleDate());
+
+    }
+
+    @Test
+    @DisplayName("특강 인원이 마감된 강의는 목록에서 조회되지 않는다.")
+    void shouldExcludeFullyBookedSchedulesFromLectureList(){
+        //given
+        Lecture lecture = new Lecture(1L, "Go Java!", "허 재");
+        when(lectureRepository.getLecture(1L)).thenReturn(lecture);
+
+        LectureSchedule schedule1 = new LectureSchedule(1L, lecture, 0, LocalDate.of(2024, 10, 1));
+        LectureSchedule schedule2 = new LectureSchedule(2L, lecture, 0, LocalDate.of(2024, 10, 2));
+        LectureSchedule schedule3 = new LectureSchedule(3L, lecture, 20, LocalDate.of(2024, 10, 3));
+        when(lectureRepository.getLectureScheduleList(1L)).thenReturn(Arrays.asList(schedule1, schedule2, schedule3));
+
+        //when
+        LectureInfo lectureInfo = lectureService.getLectureWithSchedule(lecture.getId());
+
+        //then
+        assertEquals(1,lectureInfo.scheduleInfos().size());
+        assertEquals(3L,lectureInfo.scheduleInfos().get(0).scheduleId());
     }
 
 }

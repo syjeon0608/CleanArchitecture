@@ -2,6 +2,8 @@ package com.hhplus.clean.architecture.interfaces;
 
 import com.hhplus.clean.architecture.domain.lecture.Lecture;
 import com.hhplus.clean.architecture.domain.lecture.LectureRegistration;
+import com.hhplus.clean.architecture.domain.lecture.model.LectureInfo;
+import com.hhplus.clean.architecture.interfaces.dto.GetLectureWithScheduleRes;
 import com.hhplus.clean.architecture.interfaces.dto.GetLecturesRes;
 import com.hhplus.clean.architecture.interfaces.dto.RegisterLectureRes;
 import org.springframework.stereotype.Component;
@@ -32,6 +34,15 @@ public class LectureMapper {
                         lecture.getInstructor()
                 ))
                 .collect(Collectors.toList());
+    }
+
+    public GetLectureWithScheduleRes toGetLectureWithScheduleRes(LectureInfo lectureInfo) {
+        return new GetLectureWithScheduleRes(
+                lectureInfo.lectureId(),
+                lectureInfo.title(),
+                lectureInfo.instructor(),
+                lectureInfo.scheduleInfos()
+        );
     }
 
 }

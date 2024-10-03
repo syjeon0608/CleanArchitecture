@@ -1,6 +1,8 @@
 package com.hhplus.clean.architecture.domain.lecture;
 
 import com.hhplus.clean.architecture.domain.error.BusinessException;
+import com.hhplus.clean.architecture.domain.lecture.model.LectureInfo;
+import com.hhplus.clean.architecture.domain.lecture.model.ScheduleInfo;
 import com.hhplus.clean.architecture.domain.user.User;
 import com.hhplus.clean.architecture.domain.user.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -37,5 +39,20 @@ public class LectureService {
         return lectureRepository.getLectureList();
     }
 
+    public LectureInfo getLectureWithSchedule(Long lectureId){
+        Lecture lecture = lectureRepository.getLecture(lectureId);
+        List<LectureSchedule> schedules = lectureRepository.getLectureScheduleList(lectureId)
+                .stream()
+                .filter(schedule -> schedule.getCapacity() > 0)
+                .toList();
+
+        List<ScheduleInfo> scheduleInfos = schedules.stream()
+                .map(schedule -> new ScheduleInfo(schedule.getId(), schedule.getCapacity(), schedule.getScheduleDate()))
+                .toList();
+
+        LectureInfo lectureInfo = new LectureInfo(lectureId, lecture.getTitle(), lecture.getInstructor(), scheduleInfos);
+
+        return lectureInfo;
+    }
 
 }
