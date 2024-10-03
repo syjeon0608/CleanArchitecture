@@ -15,6 +15,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import static com.hhplus.clean.architecture.domain.error.BusinessExceptionCode.DUPLICATE_ENROLLMENT;
 import static com.hhplus.clean.architecture.domain.error.BusinessExceptionCode.LECTURE_NOT_FOUND;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -40,6 +41,9 @@ public class LectureServiceConcurrencyTest {
 
         setupTestUsers(numberOfThreads);
 
+        int[] successfulRegistrations = {0};
+        int[] failedRegistrations = {0};
+
         ExecutorService executorService = Executors.newFixedThreadPool(numberOfThreads);
         CountDownLatch latch = new CountDownLatch(numberOfThreads);
 
@@ -49,8 +53,12 @@ public class LectureServiceConcurrencyTest {
             executorService.submit(() -> {
                 try {
                     lectureService.registerLecture(userId, lectureScheduleId);
-                } finally {
+                    successfulRegistrations[0]++;
+                } catch (Exception e){
+                    failedRegistrations[0]++;
+                }finally {
                     latch.countDown();
+
                 }
             });
         }
@@ -62,6 +70,52 @@ public class LectureServiceConcurrencyTest {
                 .orElseThrow(()-> new BusinessException(LECTURE_NOT_FOUND));
 
         assertEquals(0, updateLectureSchedule.getCapacity());
+        assertEquals(30, successfulRegistrations[0]);
+        assertEquals(10, failedRegistrations[0]);
+    }
+
+    @Test
+    @DisplayName("동일한 유저가 동일한 특강을 5번 신청할 때 1번만 성공해야 한다.")
+    public void shouldAllowOnlyOneRegistrationPerUser() throws InterruptedException {
+        // given
+        User user = new User(1L, "User1");
+        userJpaRepository.save(user);
+
+        Lecture lecture = new Lecture(1L, "Go Java!", "허 재");
+        lectureJpaRepository.save(lecture);
+
+        LectureSchedule lectureSchedule = new LectureSchedule(1L, lecture, 30, LocalDate.now());
+        scheduleJpaRepository.save(lectureSchedule);
+
+
+        int numberOfThreads = 5;
+        ExecutorService executorService = Executors.newFixedThreadPool(numberOfThreads);
+        CountDownLatch latch = new CountDownLatch(numberOfThreads);
+
+        int[] successfulRegistrations = {0};
+        int[] failedRegistrations = {0};
+
+        // when
+        for (int i = 0; i < numberOfThreads; i++) {
+            executorService.submit(() -> {
+                try {
+                    lectureService.registerLecture(user.getId(), lectureSchedule.getId());
+                    successfulRegistrations[0]++;
+                } catch (BusinessException e) {
+                    assertEquals(DUPLICATE_ENROLLMENT, e.getErrorCode());
+                    failedRegistrations[0]++;
+                } finally {
+                    latch.countDown();
+                }
+            });
+        }
+
+        latch.await();
+        executorService.shutdown();
+
+        // then
+        assertEquals(1, successfulRegistrations[0]);
+        assertEquals(4, failedRegistrations[0]);
     }
 
 
