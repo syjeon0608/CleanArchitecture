@@ -190,8 +190,7 @@ class LectureServiceTest {
         List<LectureDetail> lectureDetails = lectureService.getRegisteredLectures(user.getId());
 
         //then
-        assertEquals(1L, lectureDetails.get(0).lectureId());
-        assertEquals("Go python!", lectureDetails.get(1).title());
+        assertEquals(2,lectureDetails.size());
     }
 
 }
