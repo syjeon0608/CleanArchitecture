@@ -22,9 +22,9 @@ public class LectureRepositoryImpl implements LectureRepository {
     private final LectureRegistrationJpaRepository registrationJpaRepository;
 
     @Override
-    public LectureSchedule getLectureSchedule(Long lectureScheduleId) {
-            return scheduleJpaRepository.findById(lectureScheduleId)
-                    .orElseThrow(() -> new BusinessException(LECTURE_NOT_FOUND));
+    public LectureSchedule getLectureScheduleWithLock(Long lectureScheduleId) {
+        return scheduleJpaRepository.findByIdWithLock(lectureScheduleId)
+                .orElseThrow(()-> new BusinessException(LECTURE_NOT_FOUND));
     }
 
     @Override
