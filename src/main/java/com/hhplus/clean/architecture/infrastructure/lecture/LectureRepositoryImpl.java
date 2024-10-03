@@ -12,6 +12,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 import static com.hhplus.clean.architecture.domain.error.BusinessExceptionCode.LECTURE_NOT_FOUND;
+import static com.hhplus.clean.architecture.domain.error.BusinessExceptionCode.REGISTRATION_NOT_FOUND;
 
 @Repository
 @RequiredArgsConstructor
@@ -58,6 +59,15 @@ public class LectureRepositoryImpl implements LectureRepository {
             throw new BusinessException(LECTURE_NOT_FOUND);
         }
         return schedules;
+    }
+
+    @Override
+    public List<LectureRegistration> getRegistrationList(Long userId) {
+        List<LectureRegistration> registrations = registrationJpaRepository.findByUserId(userId);
+        if (registrations.isEmpty()) {
+            throw new BusinessException(REGISTRATION_NOT_FOUND);
+        }
+        return registrationJpaRepository.findByUserId(userId);
     }
 
 }

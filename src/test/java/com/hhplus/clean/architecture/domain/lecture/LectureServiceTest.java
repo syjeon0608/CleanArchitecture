@@ -175,4 +175,24 @@ class LectureServiceTest {
         assertEquals(3L,lectureInfo.scheduleInfos().get(0).scheduleId());
     }
 
+    @Test
+    @DisplayName("특강 신청 완료한 목록을 조회한다")
+    void shouldGetRegisteredLectureSchedulesByUserId(){
+        //given
+        Lecture lecture = new Lecture(1L, "Go Java!", "허 재");
+        Lecture lecture2 = new Lecture(2L, "Go python!", "토투");
+
+        when(lectureRepository.getRegistrationList(1L)).thenReturn(List.of(
+                LectureRegistration.create(user, new LectureSchedule(1L, lecture, 30, LocalDate.now())),
+                LectureRegistration.create(user, new LectureSchedule(2L, lecture2, 20, LocalDate.now()))
+        ));
+
+        //when
+        List<LectureInfo> lectureInfos = lectureService.getRegisteredLectures(user.getId());
+
+        //then
+        assertEquals(1L, lectureInfos.get(0).lectureId());
+        assertEquals("Go python!", lectureInfos.get(1).title());
+    }
+
 }

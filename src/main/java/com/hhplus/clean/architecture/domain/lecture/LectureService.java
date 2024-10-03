@@ -8,7 +8,10 @@ import com.hhplus.clean.architecture.domain.user.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static com.hhplus.clean.architecture.domain.error.BusinessExceptionCode.DUPLICATE_ENROLLMENT;
 
@@ -53,6 +56,41 @@ public class LectureService {
         LectureInfo lectureInfo = new LectureInfo(lectureId, lecture.getTitle(), lecture.getInstructor(), scheduleInfos);
 
         return lectureInfo;
+    }
+
+    public List<LectureInfo> getRegisteredLectures(Long userId) {
+        userRepository.getUser(userId);
+
+        List<LectureRegistration> registrations = lectureRepository.getRegistrationList(userId);
+        Map<Lecture, List<ScheduleInfo>> lectureScheduleMap = new HashMap<>();
+
+        for (LectureRegistration registration : registrations) {
+            LectureSchedule lectureSchedule = registration.getLectureSchedule();
+            Lecture lecture = lectureSchedule.getLecture();
+            ScheduleInfo scheduleInfo = new ScheduleInfo(
+                    lectureSchedule.getId(),
+                    lectureSchedule.getCapacity(),
+                    lectureSchedule.getScheduleDate()
+            );
+
+            lectureScheduleMap
+                    .computeIfAbsent(lecture, k -> new ArrayList<>())
+                    .add(scheduleInfo);
+        }
+
+        List<LectureInfo> registeredLectures = new ArrayList<>();
+        for (Map.Entry<Lecture, List<ScheduleInfo>> entry : lectureScheduleMap.entrySet()) {
+            Lecture lecture = entry.getKey();
+            List<ScheduleInfo> scheduleInfos = entry.getValue();
+
+            registeredLectures.add(new LectureInfo(
+                    lecture.getId(),
+                    lecture.getTitle(),
+                    lecture.getInstructor(),
+                    scheduleInfos
+            ));
+        }
+        return registeredLectures;
     }
 
 }

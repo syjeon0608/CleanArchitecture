@@ -27,4 +27,7 @@ public class LectureFacade {
         return lectureService.getLectureWithSchedule(lectureId);
     }
 
+    public List<LectureInfo> getRegisteredLectures(Long userId) {
+        return lectureService.getRegisteredLectures(userId);
+    }
 }

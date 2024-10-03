@@ -17,4 +17,6 @@ public interface LectureRepository {
     Lecture getLecture(Long lectureId);
 
     List<LectureSchedule> getLectureScheduleList(Long lectureId);
+
+    List<LectureRegistration> getRegistrationList(Long userId);
 }

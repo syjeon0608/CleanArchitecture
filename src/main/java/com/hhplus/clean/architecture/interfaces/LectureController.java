@@ -4,10 +4,7 @@ import com.hhplus.clean.architecture.application.LectureFacade;
 import com.hhplus.clean.architecture.domain.lecture.Lecture;
 import com.hhplus.clean.architecture.domain.lecture.LectureRegistration;
 import com.hhplus.clean.architecture.domain.lecture.model.LectureInfo;
-import com.hhplus.clean.architecture.interfaces.dto.GetLecturesRes;
-import com.hhplus.clean.architecture.interfaces.dto.RegisterLectureReq;
-import com.hhplus.clean.architecture.interfaces.dto.RegisterLectureRes;
-import com.hhplus.clean.architecture.interfaces.dto.GetLectureWithScheduleRes;
+import com.hhplus.clean.architecture.interfaces.dto.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -45,4 +42,12 @@ public class LectureController {
         GetLectureWithScheduleRes response = lectureMapper.toGetLectureWithScheduleRes(lectureInfo);
         return ResponseEntity.ok(response);
     }
+
+    @GetMapping("/users/{userId}/lectures/registered")
+    public ResponseEntity<List<GetRegisteredLecturesRes>> getRegisteredLectures(@PathVariable Long userId){
+        List<LectureInfo> lectureInfos = lectureFacade.getRegisteredLectures(userId);
+        List<GetRegisteredLecturesRes> response = lectureMapper.toGetRegisteredLectureRes(lectureInfos);
+        return  ResponseEntity.ok(response);
+    }
+
 }

@@ -15,6 +15,7 @@ public enum BusinessExceptionCode implements ErrorCode{
     //수강 신청 관련 예외
     DUPLICATE_ENROLLMENT(HttpStatus.BAD_REQUEST, "이미 수강신청 완료하였습니다."),
     LECTURE_FULL(HttpStatus.BAD_REQUEST, "수강인원이 가득 찼습니다."),
+    REGISTRATION_NOT_FOUND(HttpStatus.BAD_REQUEST, "수강신청 완료된 강의가 없습니다."),
 
 
     // 기타 에러
