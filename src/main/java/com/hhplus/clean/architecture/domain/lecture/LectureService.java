@@ -71,6 +71,14 @@ public class LectureService {
     public List<LectureDetail> getRegisteredLectures(Long userId) {
         userRepository.getUser(userId);
 
+        Map<Lecture, List<ScheduleInfo>> lectureScheduleMap = createLectureScheduleMap(userId);
+
+        return lectureScheduleMap.entrySet().stream()
+                .map(entry -> LectureDetail.from(entry.getKey(), entry.getValue()))
+                .collect(Collectors.toList());
+    }
+
+    private Map<Lecture, List<ScheduleInfo>> createLectureScheduleMap(Long userId) {
         List<LectureRegistration> registrations = lectureRepository.getRegistrationList(userId);
         Map<Lecture, List<ScheduleInfo>> lectureScheduleMap = new HashMap<>();
 
@@ -83,10 +91,7 @@ public class LectureService {
                     .computeIfAbsent(lecture, k -> new ArrayList<>())
                     .add(scheduleInfo);
         }
-
-        return lectureScheduleMap.entrySet().stream()
-                .map(entry -> LectureDetail.from(entry.getKey(), entry.getValue()))
-                .collect(Collectors.toList());
+        return lectureScheduleMap;
     }
 
 }
