@@ -27,14 +27,17 @@ public class LectureFacade {
         return lectureService.registerUserForLecture(user, schedule);
     }
 
+    @Transactional(readOnly = true)
     public List<LectureInfo> getLectures(){
         return lectureService.getLectureList();
     }
 
+    @Transactional(readOnly = true)
     public LectureDetail getLectureWithSchedules(Long lectureId) {
         return lectureService.getLectureWithSchedule(lectureId);
     }
 
+    @Transactional(readOnly = true)
     public List<LectureDetail> getRegisteredLectures(Long userId) {
         return lectureService.getRegisteredLectures(userId);
     }

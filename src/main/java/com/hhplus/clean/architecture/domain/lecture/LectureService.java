@@ -49,7 +49,6 @@ public class LectureService {
     }
 
 
-    @Transactional(readOnly = true)
     public List<LectureInfo> getLectureList() {
         List<Lecture> lectures = lectureRepository.getLectureList();
 
@@ -58,7 +57,6 @@ public class LectureService {
                 .collect(Collectors.toList());
     }
 
-    @Transactional(readOnly = true)
     public LectureDetail getLectureWithSchedule(Long lectureId){
         Lecture lecture = lectureRepository.getLecture(lectureId);
 
@@ -70,7 +68,6 @@ public class LectureService {
         return LectureDetail.from(lecture, scheduleInfos);
     }
 
-    @Transactional(readOnly = true)
     public List<LectureDetail> getRegisteredLectures(Long userId) {
         userRepository.getUser(userId);
 
