@@ -9,7 +9,6 @@ import com.hhplus.clean.architecture.domain.user.User;
 import com.hhplus.clean.architecture.domain.user.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -26,98 +25,72 @@ public class LectureService {
     private final LectureRepository lectureRepository;
     private final UserRepository userRepository;
 
-    @Transactional
-    public RegistrationInfo registerLecture(Long userId, Long lectureScheduleId) {
-        User user = userRepository.getUser(userId);
-        LectureSchedule schedule = lectureRepository.getLectureScheduleWithLock(lectureScheduleId);
-
-        boolean isAlreadyRegisteredForLecture = lectureRepository.isUserAlreadyRegistered(user, schedule);
-        if (isAlreadyRegisteredForLecture) {
-            throw new BusinessException(DUPLICATE_ENROLLMENT);
-        }
-
-        schedule.reduceCapacity();
-        LectureRegistration registration = LectureRegistration.create(user, schedule);
-        RegistrationInfo registrationInfo = new RegistrationInfo(
-                registration.getId(),user.getId(),
-                user.getName(),
-                schedule.getId(),
-                schedule.getLecture().getId(),
-                schedule.getLecture().getTitle(),
-                schedule.getScheduleDate()
-                );
-
-        lectureRepository.completeLectureRegistration(registration);
-
-        return registrationInfo;
+    public User getUser(Long id) {
+       return userRepository.getUser(id);
     }
 
-    @Transactional(readOnly = true)
+    public LectureSchedule getLectureSchedule(Long id) {
+        return lectureRepository.getLectureScheduleWithLock(id);
+    }
+
+    public void validateAlreadyRegistration(User user, LectureSchedule schedule) {
+        boolean isAlreadyRegistered = lectureRepository.isUserAlreadyRegistered(user, schedule);
+        if (isAlreadyRegistered) {
+            throw new BusinessException(DUPLICATE_ENROLLMENT);
+        }
+    }
+
+    public RegistrationInfo registerUserForLecture(User user, LectureSchedule schedule) {
+        LectureRegistration registration = LectureRegistration.create(user, schedule);
+        schedule.reduceCapacity();
+        lectureRepository.completeLectureRegistration(registration);
+        return  RegistrationInfo.from(registration);
+    }
+
+
     public List<LectureInfo> getLectureList() {
         List<Lecture> lectures = lectureRepository.getLectureList();
 
-        List<LectureInfo> lectureInfos = lectures.stream()
-                .map(lecture -> new LectureInfo(
-                        lecture.getId(),
-                        lecture.getTitle(),
-                        lecture.getInstructor()
-                ))
+        return lectures.stream()
+                .map(LectureInfo::from)
                 .collect(Collectors.toList());
-
-        return lectureInfos;
     }
 
-    @Transactional(readOnly = true)
     public LectureDetail getLectureWithSchedule(Long lectureId){
         Lecture lecture = lectureRepository.getLecture(lectureId);
-        List<LectureSchedule> schedules = lectureRepository.getLectureScheduleList(lectureId)
-                .stream()
+
+        List<ScheduleInfo> scheduleInfos = lectureRepository.getLectureScheduleList(lectureId).stream()
                 .filter(schedule -> schedule.getCapacity() > 0)
+                .map(ScheduleInfo::from)
                 .toList();
 
-        List<ScheduleInfo> scheduleInfos = schedules.stream()
-                .map(schedule -> new ScheduleInfo(schedule.getId(), schedule.getCapacity(), schedule.getScheduleDate()))
-                .toList();
-
-        LectureDetail lectureDetail = new LectureDetail(lectureId, lecture.getTitle(), lecture.getInstructor(), scheduleInfos);
-
-        return lectureDetail;
+        return LectureDetail.from(lecture, scheduleInfos);
     }
 
-    @Transactional(readOnly = true)
     public List<LectureDetail> getRegisteredLectures(Long userId) {
         userRepository.getUser(userId);
 
+        Map<Lecture, List<ScheduleInfo>> lectureScheduleMap = createLectureScheduleMap(userId);
+
+        return lectureScheduleMap.entrySet().stream()
+                .map(entry -> LectureDetail.from(entry.getKey(), entry.getValue()))
+                .collect(Collectors.toList());
+    }
+
+    private Map<Lecture, List<ScheduleInfo>> createLectureScheduleMap(Long userId) {
         List<LectureRegistration> registrations = lectureRepository.getRegistrationList(userId);
         Map<Lecture, List<ScheduleInfo>> lectureScheduleMap = new HashMap<>();
 
         for (LectureRegistration registration : registrations) {
             LectureSchedule lectureSchedule = registration.getLectureSchedule();
             Lecture lecture = lectureSchedule.getLecture();
-            ScheduleInfo scheduleInfo = new ScheduleInfo(
-                    lectureSchedule.getId(),
-                    lectureSchedule.getCapacity(),
-                    lectureSchedule.getScheduleDate()
-            );
+            ScheduleInfo scheduleInfo = ScheduleInfo.from(lectureSchedule);
 
             lectureScheduleMap
                     .computeIfAbsent(lecture, k -> new ArrayList<>())
                     .add(scheduleInfo);
         }
-
-        List<LectureDetail> registeredLectures = new ArrayList<>();
-        for (Map.Entry<Lecture, List<ScheduleInfo>> entry : lectureScheduleMap.entrySet()) {
-            Lecture lecture = entry.getKey();
-            List<ScheduleInfo> scheduleInfos = entry.getValue();
-
-            registeredLectures.add(new LectureDetail(
-                    lecture.getId(),
-                    lecture.getTitle(),
-                    lecture.getInstructor(),
-                    scheduleInfos
-            ));
-        }
-        return registeredLectures;
+        return lectureScheduleMap;
     }
 
 }
