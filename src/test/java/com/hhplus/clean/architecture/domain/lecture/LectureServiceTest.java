@@ -49,16 +49,12 @@ class LectureServiceTest {
     @DisplayName("특강 신청이 성공적으로 이루어져야 한다")
     void shouldRegisterLectureSuccessfully() {
         //given
-        when(userRepository.getUser(1L)).thenReturn(user);
         LectureSchedule schedule = new LectureSchedule(1L, lecture, 30, LocalDate.now());
-        when(lectureRepository.getLectureScheduleWithLock(1L)).thenReturn(schedule);
-        when(lectureRepository.isUserAlreadyRegistered(user, schedule)).thenReturn(false);
-
         LectureRegistration registration = LectureRegistration.create(user, schedule);
         when(lectureRepository.completeLectureRegistration(any(LectureRegistration.class))).thenReturn(registration);
 
         //when
-        RegistrationInfo savedRegistration = lectureService.registerLecture(1L, 1L);
+        RegistrationInfo savedRegistration = lectureService.registerUserForLecture(user, schedule);
 
         //then
         assertNotNull(savedRegistration);
@@ -71,14 +67,12 @@ class LectureServiceTest {
     @DisplayName("이미 신청한 특강에 중복 신청 시 예외가 발생해야 한다")
     void shouldThrowExceptionWhenUserIsAlreadyRegistered() {
         // given
-        when(userRepository.getUser(1L)).thenReturn(user);
         LectureSchedule schedule = new LectureSchedule(1L, lecture, 30, LocalDate.now());
-        when(lectureRepository.getLectureScheduleWithLock(1L)).thenReturn(schedule);
         when(lectureRepository.isUserAlreadyRegistered(user, schedule)).thenReturn(true);
 
         // when & then
         BusinessException exception = assertThrows(BusinessException.class,
-                () -> lectureService.registerLecture(1L, 1L));
+                () -> lectureService.validateAlreadyRegistration(user, schedule));
 
         assertEquals(DUPLICATE_ENROLLMENT, exception.getErrorCode());
     }
@@ -87,14 +81,11 @@ class LectureServiceTest {
     @DisplayName("수강 인원이 마감된 경우 예외가 발생해야 한다")
     void shouldThrowExceptionWhenLectureIsFull() {
         // given
-        when(userRepository.getUser(1L)).thenReturn(user);
         LectureSchedule schedule = new LectureSchedule(1L, lecture, 0, LocalDate.now());
-        when(lectureRepository.getLectureScheduleWithLock(1L)).thenReturn(schedule);
-        when(lectureRepository.isUserAlreadyRegistered(user, schedule)).thenReturn(false);
 
         // when & then
         BusinessException exception = assertThrows(BusinessException.class,
-                () -> lectureService.registerLecture(1L, 1L));
+                () -> lectureService.registerUserForLecture(user, schedule));
 
         assertEquals(LECTURE_FULL, exception.getErrorCode());
     }
@@ -103,13 +94,10 @@ class LectureServiceTest {
     @DisplayName("특강 신청 후 수강인원이 정상적으로 감소해야 한다")
     void shouldDecreaseLectureCapacity() {
         // given
-        when(userRepository.getUser(1L)).thenReturn(user);
         LectureSchedule schedule = new LectureSchedule(1L, lecture, 30, LocalDate.now());
-        when(lectureRepository.getLectureScheduleWithLock(1L)).thenReturn(schedule);
-        when(lectureRepository.isUserAlreadyRegistered(user, schedule)).thenReturn(false);
 
         // when
-        RegistrationInfo registration = lectureService.registerLecture(1L, 1L);
+        RegistrationInfo registration = lectureService.registerUserForLecture(user, schedule);
 
         // then
         assertEquals(29, schedule.getCapacity());

@@ -26,23 +26,28 @@ public class LectureService {
     private final LectureRepository lectureRepository;
     private final UserRepository userRepository;
 
-    @Transactional
-    public RegistrationInfo registerLecture(Long userId, Long lectureScheduleId) {
-        User user = userRepository.getUser(userId);
-        LectureSchedule schedule = lectureRepository.getLectureScheduleWithLock(lectureScheduleId);
+    public User getUser(Long id) {
+       return userRepository.getUser(id);
+    }
 
-        boolean isAlreadyRegisteredForLecture = lectureRepository.isUserAlreadyRegistered(user, schedule);
-        if (isAlreadyRegisteredForLecture) {
+    public LectureSchedule getLectureSchedule(Long id) {
+        return lectureRepository.getLectureScheduleWithLock(id);
+    }
+
+    public void validateAlreadyRegistration(User user, LectureSchedule schedule) {
+        boolean isAlreadyRegistered = lectureRepository.isUserAlreadyRegistered(user, schedule);
+        if (isAlreadyRegistered) {
             throw new BusinessException(DUPLICATE_ENROLLMENT);
         }
+    }
 
-        schedule.reduceCapacity();
+    public RegistrationInfo registerUserForLecture(User user, LectureSchedule schedule) {
         LectureRegistration registration = LectureRegistration.create(user, schedule);
-
+        schedule.reduceCapacity();
         lectureRepository.completeLectureRegistration(registration);
-
         return  RegistrationInfo.from(registration);
     }
+
 
     @Transactional(readOnly = true)
     public List<LectureInfo> getLectureList() {

@@ -1,5 +1,6 @@
 package com.hhplus.clean.architecture.domain.lecture;
 
+import com.hhplus.clean.architecture.application.LectureFacade;
 import com.hhplus.clean.architecture.domain.error.BusinessException;
 import com.hhplus.clean.architecture.domain.user.User;
 import com.hhplus.clean.architecture.infrastructure.lecture.LectureJpaRepository;
@@ -22,8 +23,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @SpringBootTest
 public class LectureServiceConcurrencyTest {
 
+
     @Autowired
-    private LectureService lectureService;
+    private LectureFacade lectureFacade;
     @Autowired
     private LectureScheduleJpaRepository scheduleJpaRepository;
     @Autowired
@@ -35,11 +37,19 @@ public class LectureServiceConcurrencyTest {
     @Test
     @DisplayName("40명의 사용자가 동시에 강의에 신청하면 30명만 성공해야 한다.")
     public void shouldHandleConcurrentLectureRegistrations() throws InterruptedException {
-        LectureSchedule lectureSchedule = setupTestLectureSchedule();
+        //given
+        Lecture lecture = new Lecture(1L,"Spring Boot 강의", "홍길동");
+        lectureJpaRepository.save(lecture);
+        LectureSchedule lectureSchedule = new LectureSchedule(1L, lecture, 30, LocalDate.of(2024, 10, 1));
+        scheduleJpaRepository.save(lectureSchedule);
+
         Long lectureScheduleId = lectureSchedule.getId();
         int numberOfThreads = 40;
 
-        setupTestUsers(numberOfThreads);
+        for (int i = 1; i <= numberOfThreads; i++) {
+            User user = new User((long) i, "user" + i);
+            userJpaRepository.save(user);
+        }
 
         int[] successfulRegistrations = {0};
         int[] failedRegistrations = {0};
@@ -47,18 +57,18 @@ public class LectureServiceConcurrencyTest {
         ExecutorService executorService = Executors.newFixedThreadPool(numberOfThreads);
         CountDownLatch latch = new CountDownLatch(numberOfThreads);
 
+        //when
         for (int i = 0; i < numberOfThreads; i++) {
             final Long userId = (long) i + 1;
 
             executorService.submit(() -> {
                 try {
-                    lectureService.registerLecture(userId, lectureScheduleId);
+                    lectureFacade.registerLecture(userId, lectureScheduleId);
                     successfulRegistrations[0]++;
                 } catch (Exception e){
                     failedRegistrations[0]++;
-                }finally {
+                } finally {
                     latch.countDown();
-
                 }
             });
         }
@@ -99,7 +109,7 @@ public class LectureServiceConcurrencyTest {
         for (int i = 0; i < numberOfThreads; i++) {
             executorService.submit(() -> {
                 try {
-                    lectureService.registerLecture(user.getId(), lectureSchedule.getId());
+                    lectureFacade.registerLecture(1L, 1L);
                     successfulRegistrations[0]++;
                 } catch (BusinessException e) {
                     assertEquals(DUPLICATE_ENROLLMENT, e.getErrorCode());
@@ -118,20 +128,4 @@ public class LectureServiceConcurrencyTest {
         assertEquals(4, failedRegistrations[0]);
     }
 
-
-
-    private LectureSchedule setupTestLectureSchedule() {
-        Lecture lecture = new Lecture(1L,"Spring Boot 강의", "홍길동");
-        lectureJpaRepository.save(lecture);
-        LectureSchedule lectureSchedule = new LectureSchedule(1L, lecture, 30, LocalDate.of(2024, 10, 1));
-        scheduleJpaRepository.save(lectureSchedule);
-        return lectureSchedule;
-    }
-
-    private void setupTestUsers(int numberOfUsers) {
-        for (int i = 1; i <= numberOfUsers; i++) {
-            User user = new User((long) i, "user" + i);
-            userJpaRepository.save(user);
-        }
-    }
 }
