@@ -17,34 +17,29 @@ import java.util.List;
 public class LectureController {
 
     private final LectureFacade lectureFacade;
-    private final LectureMapper lectureMapper;
 
     @PostMapping("register/{lectureScheduleId}")
     public ResponseEntity<RegisterLectureRes> registerLecture(@PathVariable Long lectureScheduleId, @RequestBody RegisterLectureReq userRequest) {
         RegistrationInfo registration = lectureFacade.registerLecture(userRequest.id(), lectureScheduleId);
-        RegisterLectureRes response = lectureMapper.toRegisterLectureRes(registration);
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(RegisterLectureRes.from(registration));
     }
 
     @GetMapping("lectures")
     public ResponseEntity<List<GetLecturesRes>> getLectures() {
         List<LectureInfo> lectures = lectureFacade.getLectures();
-        List<GetLecturesRes> response = lectureMapper.toGetLecturesRes(lectures);
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(GetLecturesRes.from(lectures));
     }
 
     @GetMapping("lectures/{lectureId}")
     public ResponseEntity<GetLectureWithScheduleRes> getLectureWithSchedules(@PathVariable Long lectureId) {
         LectureDetail lectureDetail = lectureFacade.getLectureWithSchedules(lectureId);
-        GetLectureWithScheduleRes response = lectureMapper.toGetLectureWithScheduleRes(lectureDetail);
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(GetLectureWithScheduleRes.from(lectureDetail));
     }
 
     @GetMapping("/users/{userId}/lectures/registered")
-    public ResponseEntity<List<GetRegisteredLecturesRes>> getRegisteredLectures(@PathVariable Long userId){
+    public ResponseEntity<List<GetRegisteredLecturesRes>> getRegisteredLectures(@PathVariable Long userId) {
         List<LectureDetail> lectureDetails = lectureFacade.getRegisteredLectures(userId);
-        List<GetRegisteredLecturesRes> response = lectureMapper.toGetRegisteredLectureRes(lectureDetails);
-        return  ResponseEntity.ok(response);
+        return ResponseEntity.ok(GetRegisteredLecturesRes.from(lectureDetails));
     }
 
 }
